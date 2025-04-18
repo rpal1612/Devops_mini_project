@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "riya1612/todo-static-app"
+        TAG = "latest"
+    }
+
+    stages {
+        stage('Clone from GitHub') {
+            steps {
+                git branch: 'main', url: 'https://github.com/rpal1612/Devops_mini_project.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo "📦 Building Docker image..."
+                sh 'find . -name Dockerfile'
+                sh '''
+                    docker build -t $IMAGE_NAME:$TAG ./todo_list_project
+                '''
+            }
+        }
+
+        stage('Test Docker Image') {
+            steps {
+                echo "🧪 Testing Docker image..."
+                sh '''
+                    echo "🧹 Cleaning up test-container if it exists..."
+                    docker rm -f test-container || true
+
+                    echo "🚀 Running test container on port 8889..."
+                    docker run -d --name test-container -p 8889:80 $IMAGE_NAME:$TAG
+
+                    sleep 5
+                    echo "🔍 Checking if app is responsive..."
+                    curl -f http://localhost:8889 || (docker logs test-container && exit 1)
+
+                    echo "🛑 Cleaning up test container..."
+                    docker stop test-container
+                    docker rm test-container
+                '''
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                echo "🚀 Pushing Docker image to Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                        echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+                        docker push $IMAGE_NAME:$TAG
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                echo "🚢 Deploying container to port 8888..."
+                sh '''
+                    docker rm -f todo-app || true
+                    docker run -d --name todo-app -p 8888:80 $IMAGE_NAME:$TAG
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ CI/CD pipeline complete!'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
+        }
+    }
+}
