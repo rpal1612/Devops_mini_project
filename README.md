@@ -119,11 +119,11 @@ docker push riya1612/todo-static-app:latest
   - Jenkins pipeline setup
   - DockerHub integration
 
-- **Atharv Patil**:
+- **Atharv Patil**(Roll number : 22101B0039):
   - Front-end development (HTML/CSS/JS)
   - Application testing
 
-- **Ganesh Choudhary**:
+- **Ganesh Choudhary**(Roll number: 22101B0072):
   - Setting up Jenkins and Docker environments
   - Integration of Jenkins with GitHub and DockerHub
   - Continuous testing and debugging
