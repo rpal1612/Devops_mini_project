@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo "📦 Building Docker image..."
+                echo " Building Docker image..."
                 sh 'find . -name Dockerfile'
                 sh '''
                     docker build -t $IMAGE_NAME:$TAG ./todo_list_project
@@ -25,19 +25,19 @@ pipeline {
 
         stage('Test Docker Image') {
             steps {
-                echo "🧪 Testing Docker image..."
+                echo " Testing Docker image..."
                 sh '''
-                    echo "🧹 Cleaning up test-container if it exists..."
+                    echo " Cleaning up test-container if it exists..."
                     docker rm -f test-container || true
 
-                    echo "🚀 Running test container on port 8889..."
+                    echo " Running test container on port 8889..."
                     docker run -d --name test-container -p 8889:80 $IMAGE_NAME:$TAG
 
                     sleep 5
-                    echo "🔍 Checking if app is responsive..."
+                    echo "Checking if app is responsive..."
                     curl -f http://localhost:8889 || (docker logs test-container && exit 1)
 
-                    echo "🛑 Cleaning up test container..."
+                    echo " Cleaning up test container..."
                     docker stop test-container
                     docker rm test-container
                 '''
@@ -46,7 +46,7 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                echo "🚀 Pushing Docker image to Docker Hub..."
+                echo "Pushing Docker image to Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh '''
                         echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                echo "🚢 Deploying container to port 8881..."
+                echo " Deploying container to port 8881..."
                 sh '''
                     docker rm -f todo-app || true
                     docker run -d --name todo-app -p 8881:80 $IMAGE_NAME:$TAG
@@ -69,10 +69,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ CI/CD pipeline complete!'
+            echo ' CI/CD pipeline complete!'
         }
         failure {
-            echo '❌ Pipeline failed.'
+            echo ' Pipeline failed.'
         }
     }
 }
