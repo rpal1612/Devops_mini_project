@@ -58,10 +58,10 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                echo "🚢 Deploying container to port 8888..."
+                echo "🚢 Deploying container to port 8881..."
                 sh '''
                     docker rm -f todo-app || true
-                    docker run -d --name todo-app -p 8888:80 $IMAGE_NAME:$TAG
+                    docker run -d --name todo-app -p 8881:80 $IMAGE_NAME:$TAG
                 '''
             }
         }
